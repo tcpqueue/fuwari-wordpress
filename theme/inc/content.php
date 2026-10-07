@@ -2,15 +2,17 @@
 defined('ABSPATH')||exit;
 add_action('init',function(){
  add_rewrite_rule('^archive/?$','index.php?fuwari_archive=1','top');
- register_post_meta('post','_fuwari_language',['single'=>true,'type'=>'string','show_in_rest'=>true,'sanitize_callback'=>'sanitize_text_field','auth_callback'=>fn()=>current_user_can('edit_posts')]);
- register_post_meta('post','_fuwari_description',['single'=>true,'type'=>'string','show_in_rest'=>true,'sanitize_callback'=>'sanitize_textarea_field','auth_callback'=>fn()=>current_user_can('edit_posts')]);
+ foreach(['post','page'] as $type){
+ register_post_meta($type,'_fuwari_language',['single'=>true,'type'=>'string','show_in_rest'=>true,'sanitize_callback'=>'sanitize_text_field','auth_callback'=>fn($allowed,$key,$id)=>current_user_can('edit_post',$id)]);
+ register_post_meta($type,'_fuwari_description',['single'=>true,'type'=>'string','show_in_rest'=>true,'sanitize_callback'=>'sanitize_textarea_field','auth_callback'=>fn($allowed,$key,$id)=>current_user_can('edit_post',$id)]);
+ }
 });
 add_filter('query_vars',fn($vars)=>array_merge($vars,['fuwari_archive']));
 add_filter('document_title_parts',function($parts){if(get_query_var('fuwari_archive'))$parts['title']=fuwari_t('archive');elseif(is_home()){if(fuwari_option('subtitle'))$parts['tagline']=fuwari_option('subtitle');else unset($parts['tagline']);}return $parts;});
-add_action('add_meta_boxes',function(){add_meta_box('fuwari-post','Fuwari','fuwari_post_box','post','side');});
+add_action('add_meta_boxes',function(){add_meta_box('fuwari-post','Fuwari','fuwari_post_box','post','side','default',['__back_compat_meta_box'=>true]);});
 function fuwari_post_box($post){wp_nonce_field('fuwari_post','fuwari_post_nonce');echo '<p><label>'.esc_html(fuwari_admin_text('文章语言（不翻译正文）','Article language (content stays unchanged)')).'<input class="widefat" name="fuwari_language" value="'.esc_attr(get_post_meta($post->ID,'_fuwari_language',true)).'" placeholder="zh-CN / en"></label></p><p><label>'.esc_html(fuwari_admin_text('首页摘要','Homepage description')).'<textarea class="widefat" name="fuwari_description">'.esc_textarea(get_post_meta($post->ID,'_fuwari_description',true)).'</textarea></label></p>';}
-add_action('save_post_post',function($id){
- if(wp_is_post_revision($id)||!current_user_can('edit_post',$id)||empty($_POST['fuwari_post_nonce'])||!wp_verify_nonce($_POST['fuwari_post_nonce'],'fuwari_post'))return;
+add_action('save_post',function($id){
+ if(!in_array(get_post_type($id),['post','page'],true)||wp_is_post_revision($id)||wp_is_post_autosave($id)||!current_user_can('edit_post',$id)||empty($_POST['fuwari_post_nonce'])||!wp_verify_nonce($_POST['fuwari_post_nonce'],'fuwari_post'))return;
  update_post_meta($id,'_fuwari_language',sanitize_text_field(wp_unslash($_POST['fuwari_language']??'')));
  update_post_meta($id,'_fuwari_description',sanitize_textarea_field(wp_unslash($_POST['fuwari_description']??'')));
 });
@@ -41,7 +43,7 @@ add_shortcode('fuwari_note',function($atts,$content=''){
  $atts=shortcode_atts(['type'=>'note','title'=>''],$atts);$type=in_array($atts['type'],['note','tip','important','warning','caution'],true)?$atts['type']:'note';
  return '<blockquote class="admonition bdm-'.$type.'"><span class="bdm-title">'.esc_html($atts['title']?:strtoupper($type)).'</span>'.wpautop(wp_kses_post(do_shortcode($content))).'</blockquote>';
 });
-add_shortcode('fuwari_github',function($atts){
+function fuwari_github_card($atts){
  $repo=trim($atts['repo']??'');if(!preg_match('~^[\w.-]+/[\w.-]+$~',$repo))return '';
  $key='fuwari_gh_'.md5($repo);$data=get_transient($key);
  if($data===false&&fuwari_option('github_cache')){
@@ -50,5 +52,5 @@ add_shortcode('fuwari_github',function($atts){
   else{set_transient($key,[],10*MINUTE_IN_SECONDS);$data=[];}
  }
  return '<a class="fuwari-github-card" href="https://github.com/'.esc_attr($repo).'" target="_blank" rel="noopener"><strong>'.fuwari_icon('fa6-brands:github').' '.esc_html($repo).'</strong><p>'.esc_html($data['description']??'').'</p><span>★ '.(int)($data['stars']??0).' · '.esc_html($data['language']??'GitHub').'</span></a>';
-});
-add_action('enqueue_block_editor_assets',function(){wp_enqueue_script('fuwari-blocks',get_template_directory_uri().'/assets/blocks.js',['wp-blocks','wp-element','wp-block-editor','wp-components','wp-i18n'],FUWARI_VERSION,true);wp_localize_script('fuwari-blocks','FuwariEditor',['code'=>fuwari_admin_text('Fuwari 代码','Fuwari Code'),'language'=>fuwari_admin_text('语言','Language'),'filename'=>fuwari_admin_text('文件名','Filename'),'lines'=>fuwari_admin_text('显示行号','Line numbers'),'note'=>fuwari_admin_text('Fuwari 提示框','Fuwari Note'),'type'=>fuwari_admin_text('类型','Type'),'title'=>fuwari_admin_text('标题','Title')]);});
+}
+add_shortcode('fuwari_github','fuwari_github_card');

@@ -1,0 +1,1 @@
+{"apiVersion":3,"name":"fuwari/admonition","title":"Fuwari Note","category":"text","icon":"info","attributes":{"type":{"type":"string","default":"note"},"title":{"type":"string","default":""}},"supports":{"html":false,"anchor":true,"align":["wide","full"],"spacing":{"margin":true,"padding":true}},"textdomain":"fuwari-wp"}

@@ -1,0 +1,1 @@
+{"apiVersion":3,"name":"fuwari/math","title":"Fuwari Math","category":"text","icon":"editor-customchar","attributes":{"content":{"type":"string","default":""},"display":{"type":"boolean","default":true}},"supports":{"html":false,"anchor":true,"align":["wide","full"],"spacing":{"margin":true}},"textdomain":"fuwari-wp"}

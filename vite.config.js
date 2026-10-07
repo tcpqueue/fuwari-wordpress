@@ -6,8 +6,8 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: 'manifest.json',
     rollupOptions: {
-      input: 'frontend/app.js',
-      output: {entryFileNames: 'app-[hash].js', chunkFileNames: '[name]-[hash].js', assetFileNames: '[name]-[hash][extname]'}
+      input: ['frontend/app.js','frontend/editor.js'],
+      output: {entryFileNames: '[name]-[hash].js', chunkFileNames: '[name]-[hash].js', assetFileNames: '[name]-[hash][extname]'}
     }
   }
 });

@@ -3,12 +3,12 @@ defined('ABSPATH') || exit;
 function fuwari_defaults() {
     return [
         'ui_language'=>'zh_CN','admin_language'=>'auto','subtitle'=>'','profile_name'=>get_bloginfo('name'),'profile_bio'=>'',
-        'avatar'=>'','social_links'=>"GitHub|fa6-brands:github|https://github.com/saicaca/fuwari",
+        'profile_name_source'=>'custom','profile_user'=>0,'avatar'=>'','social_links'=>"GitHub|fa6-brands:github|https://github.com/saicaca/fuwari",
         'banner_enable'=>1,'banner_image'=>'','banner_position'=>'center','banner_home_height'=>65,'banner_height'=>35,
         'banner_credit_enable'=>0,'banner_credit'=>'','banner_credit_url'=>'',
         'hue'=>250,'theme_mode'=>'system','visitor_color'=>1,'visitor_language'=>1,'page_size'=>8,'toc_enable'=>1,'toc_depth'=>2,
         'categories_enable'=>1,'tags_enable'=>1,'license_enable'=>1,'license_name'=>'CC BY-NC-SA 4.0','license_url'=>'https://creativecommons.org/licenses/by-nc-sa/4.0/',
-        'comments_enable'=>0,'transitions_enable'=>1,'lightbox_enable'=>1,'math_enable'=>1,'code_enable'=>1,
+        'comments_enable'=>1,'comment_captcha_enable'=>0,'transitions_enable'=>1,'lightbox_enable'=>1,'math_enable'=>1,'code_enable'=>1,
         'font_chinese'=>'system','font_chinese_url'=>'','font_english'=>'roboto','font_english_url'=>'','font_code'=>'jetbrains','font_code_url'=>'',
         'asset_css'=>'local','asset_js'=>'local','asset_fonts'=>'local','cdn_base'=>'','custom_css'=>'','github_cache'=>1,
         'updates_repo'=>'tcpqueue/fuwari-wordpress','updates_manifest'=>'','updates_auto'=>0,
@@ -22,8 +22,10 @@ function fuwari_fields() {
       'general'=>[
         ['ui_language','界面默认语言','Default interface language','select',['zh_CN'=>'简体中文','en'=>'English']],
         ['admin_language','主题后台语言','Theme settings language','select',['auto'=>'跟随管理员 / Follow user','zh_CN'=>'简体中文','en'=>'English']],
-        ['subtitle','站点副标题','Site subtitle','text'],['profile_name','个人名称','Profile name','text'],['profile_bio','个人简介','Profile bio','textarea'],
-        ['avatar','头像','Avatar','media'],['social_links','社交链接（每行 名称|图标|网址）','Social links: Name|icon|URL per line','textarea'],
+        ['subtitle','站点副标题','Site subtitle','text'],
+        ['profile_name_source','名称来源','Name source','select',['custom'=>'自定义 / Custom','username'=>'用户名 / Username','nickname'=>'用户昵称 / Nickname']],
+        ['profile_user','关联用户','Profile user','user'],['profile_name','自定义名称','Custom name','text'],['profile_bio','个人简介','Profile bio','textarea'],
+        ['avatar','头像（URL 或站内文件路径）','Avatar (URL or site file path)','media'],['social_links','社交链接','Social links','social'],
       ],
       'banner'=>[
         ['banner_enable','启用横幅','Enable banner','checkbox'],['banner_image','横幅图片','Banner image','media'],
@@ -37,7 +39,7 @@ function fuwari_fields() {
         ['page_size','每页文章数','Posts per page','number'],['categories_enable','显示分类模块','Show categories','checkbox'],['tags_enable','显示标签模块','Show tags','checkbox'],
         ['toc_enable','显示文章目录','Show table of contents','checkbox'],['toc_depth','目录标题深度（1–3）','TOC depth (1–3)','number'],
         ['license_enable','显示文章版权信息','Show post license','checkbox'],['license_name','版权协议名称','License name','text'],['license_url','版权协议链接','License URL','url'],
-        ['comments_enable','启用评论区域','Enable comments section','checkbox'],['transitions_enable','启用页面过渡','Enable page transitions','checkbox'],
+        ['comments_enable','启用评论区域','Enable comments section','checkbox'],['comment_captcha_enable','评论算术验证码（100 以内加减法）','Comment math CAPTCHA (addition/subtraction within 100)','checkbox'],['transitions_enable','启用页面过渡','Enable page transitions','checkbox'],
         ['lightbox_enable','启用图片灯箱','Enable image lightbox','checkbox'],['math_enable','启用数学公式','Enable math rendering','checkbox'],['code_enable','启用代码高亮与复制','Enable code highlighting and copy','checkbox'],
       ],
       'fonts'=>[
@@ -64,13 +66,16 @@ function fuwari_sanitize_settings($input) {
     foreach (fuwari_fields() as $fields) foreach ($fields as $field) {
         [$key,$zh,$en,$type]=$field;
         if (!array_key_exists($key,$input)) continue;
+        if($type==='social'){$clean[$key]=fuwari_sanitize_social($input[$key]);continue;}
         $value=is_scalar($input[$key]) ? (string)$input[$key] : '';
         if ($type==='select') $clean[$key]=array_key_exists($value,$field[4]) ? $value : $defaults[$key];
         elseif ($type==='checkbox') $clean[$key]=(int)!empty($value);
         elseif ($type==='number') {
             $limits=['hue'=>[0,360],'page_size'=>[1,50],'toc_depth'=>[1,3],'banner_home_height'=>[20,100],'banner_height'=>[15,90]];
             [$min,$max]=$limits[$key] ?? [1,100]; $clean[$key]=max($min,min($max,(int)$value));
-        } elseif (in_array($type,['url','media','font'],true)) $clean[$key]=esc_url_raw($value,['http','https']);
+        } elseif($type==='user')$clean[$key]=get_userdata(absint($value))?absint($value):0;
+        elseif($type==='media')$clean[$key]=fuwari_media_value($value);
+        elseif (in_array($type,['url','font'],true)) $clean[$key]=esc_url_raw($value,['http','https']);
         elseif ($type==='code') $clean[$key]=str_replace(['</style','<script'],['',''],wp_strip_all_tags($value));
         elseif ($type==='textarea') $clean[$key]=sanitize_textarea_field($value);
         else $clean[$key]=sanitize_text_field($value);
@@ -104,12 +109,16 @@ function fuwari_settings_page() {
         echo '<tr><th><label for="'.esc_attr($id).'">'.esc_html(fuwari_admin_text($zh,$en)).'</label></th><td>';
         if($type==='checkbox') echo '<input type="hidden" name="'.esc_attr($name).'" value="0"><input type="checkbox" id="'.esc_attr($id).'" name="'.esc_attr($name).'" value="1" '.checked($value,1,false).'>';
         elseif($type==='select') { echo '<select id="'.esc_attr($id).'" name="'.esc_attr($name).'">'; foreach($field[4] as $v=>$label) echo '<option value="'.esc_attr($v).'" '.selected($value,$v,false).'>'.esc_html($label).'</option>'; echo '</select>'; }
+        elseif($type==='user'){echo '<select id="'.esc_attr($id).'" name="'.esc_attr($name).'">';echo '<option value="0">'.esc_html(fuwari_admin_text('默认管理员','Default administrator')).'</option>';foreach(get_users(['orderby'=>'ID','fields'=>['ID','user_login','display_name']]) as $user)echo '<option value="'.(int)$user->ID.'" '.selected($value,$user->ID,false).'>'.esc_html($user->user_login.' — '.$user->display_name).'</option>';echo '</select>';}
+        elseif($type==='social')fuwari_social_field($name,$value);
         elseif(in_array($type,['textarea','code'],true)) echo '<textarea class="large-text '.($type==='code'?'code':'').'" rows="'.($type==='code'?12:4).'" id="'.esc_attr($id).'" name="'.esc_attr($name).'">'.esc_textarea($value).'</textarea>';
         else {
             echo '<input class="regular-text" type="'.($type==='number'?'number':($type==='url'?'url':'text')).'" id="'.esc_attr($id).'" name="'.esc_attr($name).'" value="'.esc_attr($value).'">';
             if(in_array($type,['media','font'],true))echo ' <button type="button" class="button fuwari-media" data-target="'.esc_attr($id).'" data-kind="'.esc_attr($type).'">'.esc_html(fuwari_admin_text('选择或上传','Select or upload')).'</button>';
-            if($type==='media' && $value) echo '<div><img class="fuwari-preview" src="'.esc_url($value).'" alt=""></div>';
+            if($type==='media' && $value) echo '<div><img class="fuwari-preview" src="'.esc_url(fuwari_media_url($value)).'" alt=""></div>';
+            if($key==='avatar')echo '<p class="description">'.esc_html(fuwari_admin_text('选择媒体库图片，或填写 https://…、/wp-content/uploads/…、wp-content/uploads/…；服务器路径须位于网站根目录内并指向图片文件。留空使用默认头像。','Select a media image, or enter https://…, /wp-content/uploads/…, or wp-content/uploads/…. Server paths must point to an image inside the site root. Empty uses the default avatar.')).'</p>';
         }
+        if($key==='comment_captcha_enable')echo '<p class="description">'.esc_html(fuwari_admin_text('开启后，访客和已登录用户在前台发表评论均须计算答案；题目 15 分钟有效，可换题，减法结果不为负数。后台管理员回复不受影响。','When enabled, both visitors and signed-in users must answer before posting on the front end. Questions expire after 15 minutes and can be refreshed; subtraction never produces a negative result. Administrator replies in the dashboard are unaffected.')).'</p>';
         echo '</td></tr>';
     }
     echo '</table>';

@@ -1,7 +1,7 @@
 <?php
 defined('ABSPATH') || exit;
-define('FUWARI_VERSION', '1.0.1');
-foreach (['options', 'frontend', 'content', 'updates'] as $module) require_once __DIR__ . '/inc/' . $module . '.php';
+define('FUWARI_VERSION', '1.1.0');
+foreach (['options', 'profile', 'frontend', 'content', 'editor', 'comments', 'captcha', 'updates'] as $module) require_once __DIR__ . '/inc/' . $module . '.php';
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
@@ -10,6 +10,13 @@ add_action('after_setup_theme', function () {
     add_theme_support('responsive-embeds');
     add_theme_support('align-wide');
     add_theme_support('editor-styles');
+    add_theme_support('wp-block-styles');
+    add_theme_support('appearance-tools');
+    add_theme_support('custom-line-height');
+    add_theme_support('custom-spacing');
+    add_theme_support('custom-units');
+    add_theme_support('link-color');
+    add_theme_support('border');
     add_editor_style('assets/editor.css');
     register_nav_menus(['primary'=>'Main navigation']);
 });

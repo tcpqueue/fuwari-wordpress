@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "useRootPaddingAwareAlignments": true,
+    "layout": {"contentSize": "800px", "wideSize": "1040px"},
+    "color": {
+      "custom": true, "customGradient": true, "defaultPalette": false,
+      "palette": [
+        {"slug":"primary","name":"Theme color","color":"var(--primary)"},
+        {"slug":"soft","name":"Soft background","color":"var(--btn-regular-bg)"},
+        {"slug":"ink","name":"Ink","color":"#25292f"},
+        {"slug":"white","name":"White","color":"#ffffff"},
+        {"slug":"blue","name":"Blue","color":"#3b82f6"},
+        {"slug":"green","name":"Green","color":"#16a34a"},
+        {"slug":"amber","name":"Amber","color":"#d97706"},
+        {"slug":"red","name":"Red","color":"#dc2626"}
+      ],
+      "gradients": [{"slug":"theme-soft","name":"Theme gradient","gradient":"linear-gradient(135deg,var(--btn-regular-bg),var(--card-bg))"}]
+    },
+    "typography": {
+      "customFontSize": true, "lineHeight": true,
+      "fontFamilies": [
+        {"slug":"body","name":"Theme font","fontFamily":"Roboto,\"PingFang SC\",\"Microsoft YaHei\",system-ui,sans-serif"},
+        {"slug":"system","name":"System fonts","fontFamily":"system-ui,\"PingFang SC\",\"Microsoft YaHei\",sans-serif"},
+        {"slug":"mono","name":"Code font","fontFamily":"\"JetBrains Mono Variable\",ui-monospace,monospace"}
+      ],
+      "fontSizes": [
+        {"slug":"small","name":"Small","size":"0.875rem"},
+        {"slug":"medium","name":"Body","size":"1rem"},
+        {"slug":"large","name":"Large","size":"1.25rem"},
+        {"slug":"x-large","name":"Heading","size":"1.75rem"},
+        {"slug":"xx-large","name":"Display","size":"2.25rem"}
+      ]
+    },
+    "spacing": {
+      "blockGap": true, "margin": true, "padding": true,
+      "units": ["px","em","rem","%","vw","vh"],
+      "spacingSizes": [
+        {"slug":"20","name":"XS","size":"0.5rem"},
+        {"slug":"30","name":"S","size":"0.75rem"},
+        {"slug":"40","name":"M","size":"1rem"},
+        {"slug":"50","name":"L","size":"1.5rem"},
+        {"slug":"60","name":"XL","size":"2rem"},
+        {"slug":"70","name":"XXL","size":"3rem"}
+      ]
+    },
+    "border": {"color":true,"radius":true,"style":true,"width":true},
+    "shadow": {"presets":[{"slug":"soft","name":"Soft","shadow":"0 8px 24px rgba(0,0,0,0.08)"}]}
+  },
+  "styles": {
+    "typography": {"fontFamily":"var(--wp--preset--font-family--body)","fontSize":"1rem","lineHeight":"1.75"},
+    "spacing": {"blockGap":"1.25rem"}
+  }
+}

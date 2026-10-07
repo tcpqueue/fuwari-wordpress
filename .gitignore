@@ -1,0 +1,9 @@
+.tools/
+.cache/
+.venv/
+node_modules/
+work/
+dist/
+*.zip
+__pycache__/
+.env*

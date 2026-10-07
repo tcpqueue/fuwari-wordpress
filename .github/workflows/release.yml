@@ -1,0 +1,34 @@
+name: Theme release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '9.14.4'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12.14'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:reference
+      - run: pnpm build
+      - run: uv sync --locked
+      - run: uv run python scripts/package.py
+      - name: Check PHP syntax
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find theme -name '*.php' -type f -print0)
+      - run: gh release create "$GITHUB_REF_NAME" dist/fuwari-wp-*.zip dist/fuwari-wordpress-source-*.zip dist/SHA256SUMS.txt --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

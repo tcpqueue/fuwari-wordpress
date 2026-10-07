@@ -1,0 +1,22 @@
+Fuwari
+Copyright saicaca. MIT license: ../LICENSE-Fuwari
+Reference: https://github.com/saicaca/fuwari
+Pinned source: 6d39b0dec41282e7852e23e032998a5789abee28
+
+Material Symbols
+Copyright Google. Apache License 2.0.
+https://github.com/google/material-design-icons
+
+Font Awesome Free SVG icons
+Copyright Fonticons, Inc. Creative Commons Attribution 4.0 International.
+https://fontawesome.com/license/free
+
+Roboto and JetBrains Mono
+SIL Open Font License 1.1. See the corresponding fontsource license files.
+
+KaTeX, PhotoSwipe, Swup, OverlayScrollbars and Shiki
+See the individual license files in this directory. Library notices are also
+retained in the compiled JavaScript and CSS where present in the source.
+
+The official demo artwork and the site-specific FangSong font are stored in
+WordPress uploads and are excluded from the general theme/source package.

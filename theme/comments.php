@@ -1,0 +1,1 @@
+<?php defined('ABSPATH')||exit;if(post_password_required())return;?><section class="fuwari-comments custom-md"><h2><?php echo fuwari_label('comments');?></h2><?php if(have_comments()):?><ol><?php wp_list_comments(['avatar_size'=>0,'style'=>'ol']);?></ol><?php the_comments_pagination();endif;comment_form();?></section>

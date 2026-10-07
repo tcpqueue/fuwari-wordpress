@@ -1,0 +1,1 @@
+<?php defined('ABSPATH')||exit;get_header();while(have_posts()):the_post();?><article class="card-base px-6 md:px-9 pt-6 pb-4 mb-4"><h1 class="font-bold text-3xl mb-6 text-90"><?php the_title();?></h1><div class="prose dark:prose-invert prose-base !max-w-none custom-md mb-6 markdown-content"><?php the_content();?></div></article><?php endwhile;get_footer();?>

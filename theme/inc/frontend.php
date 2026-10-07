@@ -7,7 +7,7 @@ function fuwari_dictionary() {
   'categories'=>['分类','Categories'],'tags'=>['标签','Tags'],'recentPosts'=>['最新文章','Recent Posts'],'comments'=>['评论','Comments'],
   'uncategorized'=>['未分类','Uncategorized'],'noTags'=>['无标签','No Tags'],'themeColor'=>['主题色','Theme Color'],
   'light'=>['亮色','Light'],'dark'=>['暗色','Dark'],'system'=>['跟随系统','System'],'language'=>['界面语言','Interface language'],
-  'words'=>['字','words'],'minutes'=>['分钟','minutes'],'author'=>['作者','Author'],'publishedAt'=>['发布于','Published at'],
+  'word'=>['字','word'],'words'=>['字','words'],'minute'=>['分钟','minute'],'minutes'=>['分钟','minutes'],'author'=>['作者','Author'],'publishedAt'=>['发布于','Published at'],
   'license'=>['许可协议','License'],'allPosts'=>['全部文章','All posts'],'post'=>['篇文章','post'],'posts'=>['篇文章','posts'],
   'noResults'=>['没有找到相关文章','No matching posts'],'loading'=>['搜索中…','Searching…'],'reset'=>['恢复默认','Reset to default'],
   'previous'=>['上一篇','Previous post'],'next'=>['下一篇','Next post'],'toc'=>['文章目录','Contents'],'notFound'=>['页面未找到','Page not found'],
